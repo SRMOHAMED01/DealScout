@@ -1,0 +1,62 @@
+# ============================================================
+# docker-compose.yml — Orchestration complète DealScout
+# ============================================================
+# À COMPLÉTER (Palier H). Services attendus :
+#   - zookeeper + kafka          : broker d'événements (Palier A)
+#   - minio                       : data lake S3-compatible (Palier A)
+#   - postgres                     : warehouse Gold + metadata (Palier C, F)
+#   - spark-master + spark-worker   : moteur de calcul (Palier B)
+#   - backend                        : API FastAPI (Palier F)
+#   - frontend                        : app React (Palier G)
+#   - airflow-webserver + scheduler    : orchestration (Palier H)
+#   - openmetadata + dépendances         : gouvernance (Palier H)
+#   - prometheus + grafana                 : observabilité (Palier H)
+#
+# Conseil : commence par zookeeper + kafka + minio + postgres (Palier A),
+# ajoute les autres services au fur et à mesure des paliers suivants.
+
+version: "3.9"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file: .env
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  postgres:
+    image: postgres:16
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # TODO Palier B : spark-master, spark-worker
+  # TODO Palier F : backend
+  # TODO Palier G : frontend
+  # TODO Palier H : airflow-webserver, airflow-scheduler, openmetadata,
+  #                 elasticsearch, prometheus, grafana
+
+volumes:
+  minio_data:
+  pg_data:

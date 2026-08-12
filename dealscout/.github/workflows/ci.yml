@@ -1,0 +1,24 @@
+# ============================================================
+# ci.yml — Pipeline CI/CD (Palier H)
+# ============================================================
+# À COMPLÉTER. Étapes attendues :
+#   1. Checkout
+#   2. Lint SQL dbt (sqlfluff) + lint Python (ruff) + lint frontend (eslint)
+#   3. dbt run/test sur une base CI
+#   4. Tests backend (pytest) + tests frontend (vitest)
+#   5. Build des images Docker
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "TODO: implement lint + test steps"

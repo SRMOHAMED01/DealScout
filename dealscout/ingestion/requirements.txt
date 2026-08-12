@@ -1,0 +1,7 @@
+confluent-kafka
+faker
+requests
+beautifulsoup4
+playwright
+boto3
+python-dotenv

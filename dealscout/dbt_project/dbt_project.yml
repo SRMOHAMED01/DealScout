@@ -1,0 +1,5 @@
+# dbt_project.yml — Configuration du projet dbt (Palier C.1)
+name: 'dealscout'
+version: '1.0.0'
+profile: 'dealscout'
+model-paths: ["models"]
