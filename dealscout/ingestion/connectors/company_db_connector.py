@@ -1,58 +1,35 @@
 """
-company_db_connector.py — Connecteur métadonnées entreprise (Palier A.1)
-
-À IMPLÉMENTER :
-1. fetch_company_metadata(company_name: str) -> dict
-   Retourne : sector, country, employees, funding, investors
-   (via OpenCorporates API si accessible, sinon données simulées)
-2. generate_synthetic_companies(n: int) -> list[dict]
-   Génère n entreprises fictives réalistes avec `faker` :
-   secteurs variés (FinTech, SaaS, HealthTech, E-commerce...),
-   pays variés, effectifs, levées de fonds cohérentes avec le secteur
-   et l'âge de l'entreprise (une startup de 2 ans ne lève pas 500M).
-
-RECOMMANDATION : pour ce projet, génère un dataset de 500-1000 entreprises
-simulées comme source principale — plus fiable et plus rapide à développer
-que de dépendre d'APIs externes à quota limité.
-"""
-"""
 DealScout - Company Database Connector
 Palier A.1
 
 Responsabilité :
-    Fournir les métadonnées des entreprises à la pipeline
-    d'ingestion DealScout.
+    Fournir les métadonnées des entreprises à la pipeline d'ingestion DealScout.
+    Supporte la génération, le chargement, la recherche par nom et par ID,
+    ainsi que le filtrage et le listing.
 
-Source principale pour le développement :
-    Dataset synthétique généré localement.
-
-Source externe future :
-    OpenCorporates ou autre API company database.
-
-Le connector ne contient pas la logique complexe de génération.
-Cette responsabilité appartient à :
-
-    ingestion/generators/company_generator.py
+Source principale :
+    Dataset synthétique généré localement via ingestion.generators.company_generator.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
+from ingestion.config import config
 from ingestion.generators.company_generator import (
     generate_companies,
 )
 
+logger = logging.getLogger(__name__)
 
 # ============================================================
 # CONFIGURATION
 # ============================================================
 
-DEFAULT_DATASET_PATH = Path(
-    "data/samples/companies.json"
-)
+DEFAULT_DATASET_PATH = config.local_samples_dir / "companies.json"
 
 
 # ============================================================
@@ -250,6 +227,65 @@ def fetch_company_by_id(
             return company
 
     return None
+
+
+# ============================================================
+# API ALIASES & QUERY HELPERS
+# ============================================================
+
+def get_company_by_id(
+    company_id: str,
+    dataset_path: str | Path = DEFAULT_DATASET_PATH,
+) -> dict[str, Any] | None:
+    """Alias for fetch_company_by_id."""
+    return fetch_company_by_id(company_id=company_id, dataset_path=dataset_path)
+
+
+def search_company_by_name(
+    company_name: str,
+    dataset_path: str | Path = DEFAULT_DATASET_PATH,
+) -> dict[str, Any] | None:
+    """Alias for fetch_company_metadata."""
+    return fetch_company_metadata(company_name=company_name, dataset_path=dataset_path)
+
+
+def list_companies(
+    limit: int = 100,
+    offset: int = 0,
+    dataset_path: str | Path = DEFAULT_DATASET_PATH,
+) -> list[dict[str, Any]]:
+    """
+    Returns a paginated list of companies.
+    """
+    companies = load_companies(dataset_path)
+    return companies[offset : offset + limit]
+
+
+def filter_companies(
+    sector: str | None = None,
+    country: str | None = None,
+    min_growth: float | None = None,
+    min_employees: int | None = None,
+    dataset_path: str | Path = DEFAULT_DATASET_PATH,
+) -> list[dict[str, Any]]:
+    """
+    Filters companies by sector, country, growth threshold, or minimum employees.
+    """
+    companies = load_companies(dataset_path)
+    results = []
+
+    for c in companies:
+        if sector and c.get("sector", "").lower() != sector.lower():
+            continue
+        if country and c.get("country", "").lower() != country.lower():
+            continue
+        if min_growth is not None and c.get("revenue_growth", 0.0) < min_growth:
+            continue
+        if min_employees is not None and c.get("employees", 0) < min_employees:
+            continue
+        results.append(c)
+
+    return results
 
 
 # ============================================================

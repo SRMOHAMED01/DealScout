@@ -1,0 +1,67 @@
+# Python cache & build
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Testing & Coverage
+.pytest_cache/
+.pytest_temp/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Large generated data & Lakehouse storage
+data/samples/companies.json
+data/samples/*.json
+data/bronze/
+data/silver/
+data/gold/
+*.parquet
+*.delta
+
+# Logs & OS artifacts
+*.log
+.DS_Store
+Thumbs.db
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/build/
+.vite/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
