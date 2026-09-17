@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import socket
 import time
 from collections import defaultdict
 from typing import Any, Callable
@@ -27,6 +28,21 @@ try:
     KAFKA_AVAILABLE = True
 except ImportError:
     KAFKA_AVAILABLE = False
+
+
+def is_kafka_reachable(bootstrap_servers: str, timeout: float = 0.5) -> bool:
+    """Proactively checks whether Kafka TCP port is listening."""
+    try:
+        endpoint = bootstrap_servers.split(",")[0].strip()
+        if ":" in endpoint:
+            host, port_str = endpoint.split(":")
+            port = int(port_str)
+        else:
+            host, port = endpoint, 9092
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except Exception:
+        return False
 
 
 class InMemoryKafkaBus:
@@ -72,19 +88,23 @@ class DealScoutProducer:
         self._producer: Any = None
 
         if not self.mock_mode and KAFKA_AVAILABLE:
-            try:
-                conf = {
-                    "bootstrap.servers": self.bootstrap_servers,
-                    "retries": self.retries,
-                    "socket.timeout.ms": 2000,
-                    "message.timeout.ms": 3000,
-                    "linger.ms": 10,
-                }
-                self._producer = ConfluentProducer(conf)
-                logger.info("Connected to Kafka at %s", self.bootstrap_servers)
-            except Exception as err:
-                logger.warning("Kafka connection failed (%s), switching to in-memory mock", err)
+            if not is_kafka_reachable(self.bootstrap_servers):
+                logger.info("Kafka broker offline at %s, using resilient in-memory bus", self.bootstrap_servers)
                 self.mock_mode = True
+            else:
+                try:
+                    conf = {
+                        "bootstrap.servers": self.bootstrap_servers,
+                        "retries": self.retries,
+                        "socket.timeout.ms": 2000,
+                        "message.timeout.ms": 3000,
+                        "linger.ms": 10,
+                    }
+                    self._producer = ConfluentProducer(conf)
+                    logger.info("Connected to Kafka at %s", self.bootstrap_servers)
+                except Exception as err:
+                    logger.warning("Kafka connection failed (%s), switching to in-memory mock", err)
+                    self.mock_mode = True
 
     def build_envelope(
         self,
@@ -115,19 +135,18 @@ class DealScoutProducer:
             envelope = self.build_envelope(payload, event_type, source)
             serialized = envelope.model_dump_json()
 
-            if self.mock_mode or self._producer is None:
-                in_memory_bus.publish(topic, key, json.loads(serialized))
-                logger.debug("Produced event to in-memory topic %s (key=%s)", topic, key)
-                return envelope
+            # Always record to in-memory bus for local downstream pipeline consumers
+            in_memory_bus.publish(topic, key, json.loads(serialized))
 
-            # Real Kafka produce with retry callback
-            self._producer.produce(
-                topic=topic,
-                key=key.encode("utf-8") if key else None,
-                value=serialized.encode("utf-8"),
-                on_delivery=self._delivery_report,
-            )
-            self._producer.poll(0)
+            if not self.mock_mode and self._producer is not None:
+                self._producer.produce(
+                    topic=topic,
+                    key=key.encode("utf-8") if key else None,
+                    value=serialized.encode("utf-8"),
+                    on_delivery=self._delivery_report,
+                )
+                self._producer.poll(0)
+
             return envelope
 
         except Exception as exc:
