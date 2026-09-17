@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: company_360
+    description: "Vue 360 consolidée d'une entreprise joignant profil, finances et signaux actualités"
+    columns:
+      - name: company_id
+        description: "Clé primaire de l'entreprise"
+        tests:
+          - unique
+          - not_null
+      - name: name
+        description: "Raison sociale normalisée de l'entreprise"
+        tests:
+          - not_null
+      - name: sector
+        description: "Secteur d'activité standardisé"
+        tests:
+          - not_null
+      - name: revenue
+        description: "Chiffre d'affaires en USD"
+      - name: growth
+        description: "Croissance annuelle YoY en %"
+      - name: financial_health
+        description: "Score composite de solvabilité et rentabilité (0-100)"
+
+  - name: investment_targets
+    description: "Classement et scoring des cibles prioritaires d'acquisition"
+    columns:
+      - name: company_id
+        description: "Identifiant de la cible"
+        tests:
+          - unique
+          - not_null
+      - name: m_and_a_score
+        description: "Score M&A global pondéré (0-100)"
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Niveau de risque financier"
+        tests:
+          - accepted_values:
+              values: ['Low', 'Medium', 'High']
+      - name: recommendation
+        description: "Décision opérationnelle suggérée"
+        tests:
+          - accepted_values:
+              values: ['Cible prioritaire', 'À surveiller', 'Faible priorité']
+
+  - name: market_analysis
+    description: "Agrégat sectoriel de veille concurrentielle et d'investissement"
+    columns:
+      - name: sector
+        description: "Secteur d'activité"
+        tests:
+          - unique
+          - not_null
+      - name: number_of_companies
+        description: "Nombre de cibles référencées dans le secteur"
+      - name: average_growth
+        description: "Croissance moyenne sectorielle"

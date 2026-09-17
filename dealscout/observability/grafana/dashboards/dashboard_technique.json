@@ -1,0 +1,91 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "type": "timeseries",
+      "title": "Latence API FastAPI (p50, p95, p99)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "type": "timeseries",
+      "title": "Débit d'ingestion Kafka (msg/sec)",
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_topic_partition_current_offset[1m])) by (topic)",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "type": "timeseries",
+      "title": "Taux d'erreurs HTTP 5xx (%)",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
+          "legendFormat": "5xx error rate",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 6 },
+      "type": "timeseries",
+      "title": "Durée d'exécution du Pipeline Quotidien Airflow (secondes)",
+      "targets": [
+        {
+          "expr": "airflow_dag_run_duration{dag_id=\"dealscout_daily_pipeline\"}",
+          "legendFormat": "Durée DAG",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 6 },
+      "type": "gauge",
+      "title": "Taux de Succès des Contrôles Data Quality (%)",
+      "targets": [
+        {
+          "expr": "dealscout_data_quality_passed_checks / dealscout_data_quality_total_checks * 100",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["dealscout", "technical", "devops"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "DealScout — Infrastructure & Pipeline Health",
+  "uid": "dealscout-technical"
+}

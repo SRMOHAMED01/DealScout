@@ -1,0 +1,35 @@
+# metadata_config.yml — Configuration de la Gouvernance OpenMetadata (Palier H)
+serviceName: "dealscout-lakehouse"
+serviceType: "OpenMetadata"
+
+dataSources:
+  - name: "kafka-pipeline"
+    type: "Messaging"
+    topics:
+      - "companies-events"
+      - "financial-events"
+      - "news-events"
+
+  - name: "minio-bronze-lakehouse"
+    type: "Storage"
+    bucket: "bronze"
+    format: "json"
+
+  - name: "parquet-silver-lakehouse"
+    type: "Storage"
+    bucket: "silver"
+    format: "parquet"
+
+  - name: "postgres-gold-warehouse"
+    type: "Database"
+    tables:
+      - name: "company_360"
+        owner: "DealScout Data Engineering Team"
+        tier: "Tier1"
+      - name: "investment_targets"
+        owner: "M&A / Private Equity Team"
+        tier: "Tier1"
+        description: "Table décisionnelle des cibles M&A prioritaires scorées"
+      - name: "market_analysis"
+        owner: "M&A Strategy"
+        tier: "Tier2"

@@ -1,0 +1,80 @@
+{
+  "pipeline": "DealScout_EndToEnd_Lakehouse",
+  "edges": [
+    {
+      "fromEntity": "source.company_generator",
+      "toEntity": "kafka.topic.companies-events",
+      "relationship": "produces"
+    },
+    {
+      "fromEntity": "source.financial_connector",
+      "toEntity": "kafka.topic.financial-events",
+      "relationship": "produces"
+    },
+    {
+      "fromEntity": "source.news_connector",
+      "toEntity": "kafka.topic.news-events",
+      "relationship": "produces"
+    },
+    {
+      "fromEntity": "kafka.topic.companies-events",
+      "toEntity": "lakehouse.bronze.companies",
+      "relationship": "ingested_by.bronze_writer"
+    },
+    {
+      "fromEntity": "kafka.topic.financial-events",
+      "toEntity": "lakehouse.bronze.financial",
+      "relationship": "ingested_by.bronze_writer"
+    },
+    {
+      "fromEntity": "kafka.topic.news-events",
+      "toEntity": "lakehouse.bronze.news",
+      "relationship": "ingested_by.bronze_writer"
+    },
+    {
+      "fromEntity": "lakehouse.bronze.companies",
+      "toEntity": "lakehouse.silver.companies",
+      "relationship": "transformed_by.spark_companies"
+    },
+    {
+      "fromEntity": "lakehouse.bronze.financial",
+      "toEntity": "lakehouse.silver.financial",
+      "relationship": "transformed_by.spark_financial"
+    },
+    {
+      "fromEntity": "lakehouse.bronze.news",
+      "toEntity": "lakehouse.silver.news",
+      "relationship": "transformed_by.spark_news"
+    },
+    {
+      "fromEntity": "lakehouse.silver.companies",
+      "toEntity": "gold.dbt.company_360",
+      "relationship": "joined_in.dbt"
+    },
+    {
+      "fromEntity": "lakehouse.silver.financial",
+      "toEntity": "gold.dbt.company_360",
+      "relationship": "joined_in.dbt"
+    },
+    {
+      "fromEntity": "lakehouse.silver.news",
+      "toEntity": "gold.dbt.company_360",
+      "relationship": "joined_in.dbt"
+    },
+    {
+      "fromEntity": "gold.dbt.company_360",
+      "toEntity": "gold.dbt.investment_targets",
+      "relationship": "scored_by.rules_scoring_and_ml"
+    },
+    {
+      "fromEntity": "gold.dbt.investment_targets",
+      "toEntity": "service.fastapi.endpoints",
+      "relationship": "served_by.fastapi"
+    },
+    {
+      "fromEntity": "service.fastapi.endpoints",
+      "toEntity": "ui.react.dashboard",
+      "relationship": "visualized_in.react"
+    }
+  ]
+}

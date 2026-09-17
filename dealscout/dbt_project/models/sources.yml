@@ -1,0 +1,38 @@
+version: 2
+
+sources:
+  - name: silver
+    description: "Nettoyé et standardisé à partir du Data Lakehouse Bronze via PySpark"
+    tables:
+      - name: companies
+        description: "Table des profils et métadonnées d'entreprises nettoyées"
+        columns:
+          - name: company_id
+            description: "Identifiant unique de l'entreprise (CMP-XXXXXX)"
+            tests:
+              - unique
+              - not_null
+
+      - name: financial
+        description: "Table des métriques financières et indicateurs de solvabilité"
+        columns:
+          - name: company_id
+            description: "Identifiant de l'entreprise associée"
+            tests:
+              - unique
+              - not_null
+          - name: revenue
+            description: "Chiffre d'affaires en USD"
+          - name: financial_health_score
+            description: "Score de santé financière normalisé entre 0 et 100"
+
+      - name: news
+        description: "Table agrégée des actualités et scores de sentiment"
+        columns:
+          - name: company_id
+            description: "Identifiant de l'entreprise associée"
+            tests:
+              - unique
+              - not_null
+          - name: news_sentiment_score
+            description: "Sentiment moyen pondéré entre -1.0 et +1.0"

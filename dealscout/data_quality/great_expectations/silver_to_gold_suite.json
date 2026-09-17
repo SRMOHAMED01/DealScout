@@ -1,0 +1,44 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "dealscout_silver_to_gold_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "company_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "m_and_a_score"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "m_and_a_score",
+        "min_value": 0.0,
+        "max_value": 100.0
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "risk_level",
+        "value_set": ["Low", "Medium", "High"]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "recommendation",
+        "value_set": ["Cible prioritaire", "À surveiller", "Faible priorité"]
+      }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.0"
+  }
+}
