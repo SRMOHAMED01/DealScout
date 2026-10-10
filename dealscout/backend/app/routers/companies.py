@@ -1,17 +1,17 @@
-"""
-companies.py — Company endpoints for FastAPI (Palier F)
+﻿"""
+companies.py â€” Company endpoints for FastAPI (Palier F)
 """
 
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
 
-from backend.app.schemas.company import (
+from app.schemas.company import (
     CompanyScoreSchema,
     MarketSectorSummary,
     PaginatedResponse,
 )
-from backend.app.services.scoring_service import service
+from app.services.scoring_service import service
 
 router = APIRouter(tags=["Companies"])
 
@@ -61,3 +61,4 @@ def get_market_analysis():
     Returns sector-level aggregations and comparative M&A dynamics.
     """
     return service.market_analysis()
+

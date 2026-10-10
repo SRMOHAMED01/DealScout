@@ -1,3 +1,4 @@
+﻿"""
+investment_target.py â€” ModÃ¨le SQLAlchemy mappant investment_targets (Palier F)
 """
-investment_target.py — Modèle SQLAlchemy mappant investment_targets (Palier F)
-"""
+

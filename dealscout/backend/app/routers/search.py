@@ -1,13 +1,13 @@
-"""
-search.py — Multi-criteria M&A target search router (Palier F)
+﻿"""
+search.py â€” Multi-criteria M&A target search router (Palier F)
 """
 
 from __future__ import annotations
 
 from fastapi import APIRouter, Query
 
-from backend.app.schemas.company import PaginatedResponse
-from backend.app.services.scoring_service import service
+from app.schemas.company import PaginatedResponse
+from app.services.scoring_service import service
 
 router = APIRouter(tags=["Search"])
 
@@ -41,3 +41,4 @@ def search_targets(
         "offset": offset,
         "items": items,
     }
+

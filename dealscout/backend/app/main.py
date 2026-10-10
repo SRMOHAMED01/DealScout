@@ -1,5 +1,5 @@
-"""
-main.py — Point d'entrée FastAPI pour DealScout (Palier F)
+﻿"""
+main.py â€” Point d'entrÃ©e FastAPI pour DealScout (Palier F)
 """
 
 from __future__ import annotations
@@ -8,12 +8,12 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.routers import companies, search
+from app.routers import companies, search
 
 logger = logging.getLogger("dealscout.backend")
 
 app = FastAPI(
-    title="DealScout API — M&A Intelligence Platform",
+    title="DealScout API â€” M&A Intelligence Platform",
     description="API for enterprise detection, financial analysis, multi-criteria screening, and M&A opportunity scoring.",
     version="1.0.0",
 )
@@ -53,3 +53,4 @@ except Exception as prom_err:
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=True)
+

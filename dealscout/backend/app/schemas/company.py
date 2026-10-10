@@ -1,4 +1,4 @@
-"""
+﻿"""
 Pydantic schemas for DealScout FastAPI Backend.
 """
 
@@ -71,3 +71,4 @@ class MarketSectorSummary(BaseModel):
     average_financial_health: float
     investment_volume: float
     average_sentiment: float
+

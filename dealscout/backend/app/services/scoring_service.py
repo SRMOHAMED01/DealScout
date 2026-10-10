@@ -1,5 +1,5 @@
-"""
-scoring_service.py — Data loading, search, and score aggregation service for FastAPI.
+﻿"""
+scoring_service.py â€” Data loading, search, and score aggregation service for FastAPI.
 """
 
 from __future__ import annotations
@@ -86,7 +86,7 @@ class CompanyScoringService:
             "name": rec["name"],
             "m_and_a_score": float(rec.get("m_and_a_score", 0.0)),
             "ranking": int(rec.get("ranking", 1)),
-            "recommendation": str(rec.get("recommendation", "À surveiller")),
+            "recommendation": str(rec.get("recommendation", "Ã€ surveiller")),
             "risk_level": str(rec.get("risk_level", "Medium")),
             "acquisition_probability": round(float(rec.get("m_and_a_score", 50.0)) * 0.95, 1),
             "components": components,
@@ -143,3 +143,4 @@ class CompanyScoringService:
 
 
 service = CompanyScoringService()
+
