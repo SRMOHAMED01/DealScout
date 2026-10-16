@@ -1,10 +1,22 @@
 ﻿"""
-main.py â€” Point d'entrÃ©e FastAPI pour DealScout (Palier F)
+main.py — Point d'entrée FastAPI pour DealScout (Palier F)
+
+L'ajout du répertoire backend/ au sys.path permet aux imports internes
+``app.xxx`` (utilisés dans tout le backend) de fonctionner quel que soit le
+point d'entrée : ``uvicorn backend.app.main:app`` depuis la racine dealscout,
+ou directement depuis le répertoire backend (workdir Docker /app).
 """
 
 from __future__ import annotations
 
 import logging
+import sys
+from pathlib import Path
+
+_BACKEND_DIR = Path(__file__).resolve().parent.parent  # .../dealscout/backend
+if str(_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_DIR))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -54,4 +66,3 @@ except Exception as prom_err:
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=True)
-
