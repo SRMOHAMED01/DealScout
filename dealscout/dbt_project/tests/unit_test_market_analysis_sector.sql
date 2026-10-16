@@ -6,9 +6,10 @@
     )
 }}
 
-select *
+select sector, count(*) as nb
 from {{ ref('market_analysis') }}
 where sector is null
+group by sector
 
 union all
 

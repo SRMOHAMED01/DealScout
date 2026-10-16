@@ -40,12 +40,14 @@ models:
         description: "Niveau de risque financier"
         tests:
           - accepted_values:
-              values: ['Low', 'Medium', 'High']
+              arguments:
+                values: ['Low', 'Medium', 'High']
       - name: recommendation
         description: "Décision opérationnelle suggérée"
         tests:
           - accepted_values:
-              values: ['Cible prioritaire', 'À surveiller', 'Faible priorité']
+              arguments:
+                values: ['Cible prioritaire', 'À surveiller', 'Faible priorité']
 
   - name: market_analysis
     description: "Agrégat sectoriel de veille concurrentielle et d'investissement"

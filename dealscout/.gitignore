@@ -65,3 +65,9 @@ build/
 .vscode/
 *.swp
 *.swo
+
+# dbt
+target/
+dbt_packages/
+logs/
+.user.yml

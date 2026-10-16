@@ -7,7 +7,7 @@ dealscout:
     dev:
       type: postgres
       host: localhost
-      port: 5432
+      port: 5433
       user: dealscout
       password: changeme
       dbname: dealscout_db
