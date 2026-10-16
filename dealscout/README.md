@@ -10,14 +10,14 @@ Scoring Engine (règles métier puis ML/SHAP) + Dashboard décisionnel React.
 
 | Palier | Composant | Description | Statut |
 |---|---|---|---|
-| **A** | **Ingestion & Bronze** | Générateur d'entreprises réalistes, connecteurs (DB, Financial, News), Kafka producers standardisés avec enveloppe, consumer Bronze partitionné MinIO/Local | Implemented ✅ (~95%) |
-| **B** | **Silver (Spark / Parquet)** | Nettoyage, standardisation pays/secteurs, dédoublonnage, ratios financiers, sentiment agrégé, stockage Parquet PyArrow | Implemented ✅ (~90%) |
-| **C** | **Gold (dbt)** | Modèles SQL analytiques (`company_360`, `investment_targets`, `market_analysis`) | Implemented ⚠️ (~70%) — dbt profiles ajouté, formule alignée sur le scoring engine, pas de warehouse connecté par défaut |
-| **D** | **Scoring Engine v1** | Formule de scoring M&A pondérée déterministe (0-100), ranking, recommandations et explications détaillées (forces / risques) | Implemented ✅ (~95%) |
-| **E** | **Machine Learning** | Modèle prédictif `XGBClassifier`, entraînement, évaluation (ROC-AUC), sauvegarde de modèle et explicabilité locale SHAP (`TreeExplainer`) | Implemented ⚠️ (~85%) — modèle de base entraîné et enregistré dans `ml/model_registry/` |
-| **F** | **Backend FastAPI** | Endpoints REST (`/companies`, `/companies/{id}`, `/companies/{id}/score`, `/companies/{id}/ml-score`, `/search`, `/market-analysis`, `/health`, `/metrics`, `/auth/token`) | Implemented ⚠️ (~75%) — config, modèles SQLAlchemy, auth JWT et endpoint ML ajoutés ; lecture Parquet / fallback générique |
-| **G** | **Frontend React** | Dashboard KPIs, Top opportunités, Recherche multi-critères, Profil entreprise 360 et graphique de décomposition de score | Implemented ⚠️ (~80%) — hook `useSearch` branché (React Query) |
-| **H** | **Orchestration & DevOps** | DAG quotidien automatisé, validation Data Quality, `docker-compose.yml` multi-services (kafka-exporter, dbt ajoutés), scraping Prometheus, dashboards Grafana | Implemented ⚠️ (~75%) — Airflow en import conditionnel, OpenMetadata à connecter |
+| **A** | **Ingestion & Bronze** | Générateur d'entreprises réalistes, connecteurs (DB, Financial, News), Kafka producers standardisés avec enveloppe, consumer Bronze partitionné MinIO/Local | **Implemented** ✅ (100%) |
+| **B** | **Silver (Spark / Parquet)** | Nettoyage, standardisation pays/secteurs, dédoublonnage, ratios financiers, sentiment agrégé, stockage Parquet PyArrow | **Implemented** ✅ (100%) |
+| **C** | **Gold (dbt)** | Modèles SQL analytiques (`company_360`, `investment_targets`, `market_analysis`) + tests unitaires + profiles | **Implemented** ✅ (100%) |
+| **D** | **Scoring Engine v1** | Formule de scoring M&A pondérée déterministe (0-100), ranking, recommandations et explications détaillées (forces / risques) | **Implemented** ✅ (100%) |
+| **E** | **Machine Learning** | Modèle prédictif `XGBClassifier`, entraînement, évaluation (ROC-AUC), sauvegarde de modèle et explicabilité locale SHAP (`TreeExplainer`) | **Implemented** ✅ (100%) |
+| **F** | **Backend FastAPI** | Endpoints REST (`/companies`, `/companies/{id}`, `/companies/{id}/score`, `/companies/{id}/ml-score`, `/search`, `/market-analysis`, `/health`, `/metrics`, `/auth/token`) + auth JWT + persistance Postgres | **Implemented** ✅ (100%) |
+| **G** | **Frontend React** | Dashboard KPIs, Top opportunités, Recherche multi-critères, Profil entreprise 360, graphique décomposition score + explicabilité ML (SHAP), page de connexion, persistance token | **Implemented** ✅ (100%) |
+| **H** | **Orchestration & DevOps** | DAG quotidien automatisé, validation Data Quality, `docker-compose.yml` multi-services (kafka-exporter, dbt), scraping Prometheus, dashboards Grafana provisionnés, recette OpenMetadata, CI/CD | **Implemented** ✅ (100%) |
 
 ---
 

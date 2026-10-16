@@ -20,6 +20,11 @@ if str(_BACKEND_DIR) not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.database import SessionLocal, engine, Base
+from app.core.config import settings
+from app.models.company import Company
+from app.models.investment_target import InvestmentTarget
+
 from app.routers import auth, companies, search
 
 logger = logging.getLogger("dealscout.backend")
@@ -43,6 +48,15 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(companies.router)
 app.include_router(search.router)
+
+
+@app.on_event("startup")
+def _init_db() -> None:
+    """Crée les tables Postgres et persiste les cibles scorées au démarrage."""
+    Base.metadata.create_all(bind=engine)
+    service.refresh_data()
+    service.persist_to_postgres()
+    logger.info("Base de données initialisée et cibles persistées")
 
 
 @app.get("/health", tags=["Health"])

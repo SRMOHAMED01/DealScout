@@ -1,8 +1,25 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import CompanyProfile from "./pages/CompanyProfile";
 import Search from "./pages/Search";
+import Login from "./pages/Login";
+import { isAuthenticated, setToken, removeToken, getToken } from "./api/companies";
+
+function requireAuth({ children }) {
+  const [ready, setReady] = useState(false);
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    const token = getToken();
+    setAuthed(!!token);
+    setReady(true);
+  }, []);
+
+  if (!ready) return null;
+  if (!authed) return <Navigate to="/login" replace={true} />;
+  return children;
+}
 
 export default function App() {
   return (
@@ -25,15 +42,57 @@ export default function App() {
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
               <span>API Connectée</span>
             </div>
+            <div className="flex items-center space-x-4">
+              {isAuthenticated() ? (
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Connecté</span>
+                  <button
+                    onClick={() => {
+                      removeToken();
+                      window.location.reload();
+                    }}
+                    className="text-xs bg-red-50 text-red-600 px-2 py-1 rounded hover:bg-red-100 transition-colors"
+                  >
+                    Déconnexion
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition-colors">
+                  Se connecter
+                </Link>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Main Content */}
         <main className="flex-1">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/companies/:id" element={<CompanyProfile />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <requireAuth>
+                  <Dashboard />
+                </requireAuth>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <requireAuth>
+                  <Search />
+                </requireAuth>
+              }
+            />
+            <Route
+              path="/companies/:id"
+              element={
+                <requireAuth>
+                  <CompanyProfile />
+                </requireAuth>
+              }
+            />
           </Routes>
         </main>
 

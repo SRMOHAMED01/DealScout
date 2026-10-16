@@ -1,0 +1,59 @@
+# OpenMetadata ingestion recipe — DealScout (Palier H / Gouvernance)
+# Connecte OpenMetadata à MinIO (Bronze/Silver), Postgres (Gold) et Airflow,
+# puis ingère la lignée de données complète.
+#
+# Usage : openmetadata-ingest --config governance/openmetadata/ingestion_recipe.yaml
+
+source:
+  type: "metadata-ingestion"  # placeholder ; adapter selon le connecteur OpenMetadata réel
+  config: {}
+
+pipeline:
+  name: dealscout-lineage-ingestion
+  steps:
+    - name: minio-bronze
+      description: "Ingère le bucket MinIO bronze (données brutes Kafka)"
+      connection:
+        type: "s3"
+        serviceName: dealscout-minio
+        serviceType: "Storage"
+        bucket: bronze
+        region: us-east-1
+        endpoint: http://minio:9000
+
+    - name: minio-silver
+      description: "Ingère le bucket MinIO silver (Parquet nettoyé)"
+      connection:
+        type: "s3"
+        serviceName: dealscout-minio
+        serviceType: "Storage"
+        bucket: silver
+        region: us-east-1
+        endpoint: http://minio:9000
+
+    - name: postgres-gold
+      description: "Ingère l'entrepôt Gold Postgres (company_360, investment_targets, market_analysis)"
+      connection:
+        type: "postgres"
+        serviceName: dealscout-postgres
+        serviceType: "Database"
+        hostPort: postgres:5432
+        username: dealscout
+        password: changeme
+        database: dealscout_db
+        schema: public
+
+    - name: airflow-dag
+      description: "Ingère le DAG Airflow dealscout_daily_pipeline"
+      connection:
+        type: "airflow"
+        serviceName: dealscout-airflow
+        serviceType: "Orchestrator"
+        hostPort: http://airflow:8080
+        username: dealscout
+        password: changeme
+
+    - name: lineage
+      description: "Récrée la lignée de bout en bout (source → Kafka → Bronze → Silver → Gold → API → UI)"
+      config:
+        edgesFile: governance/openmetadata_lineage.json

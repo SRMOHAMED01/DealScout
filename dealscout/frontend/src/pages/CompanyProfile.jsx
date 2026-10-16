@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import ShapChart from "../components/ShapChart";
-import { getCompanyProfile, getCompanyScore } from "../api/companies";
+import {
+  getCompanyProfile,
+  getCompanyScore,
+  getCompanyMLScore,
+} from "../api/companies";
 
 export default function CompanyProfile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [scoreData, setScoreData] = useState(null);
+  const [mlScore, setMLScore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,12 +19,14 @@ export default function CompanyProfile() {
     async function loadData() {
       try {
         setLoading(true);
-        const [prof, sc] = await Promise.all([
+        const [prof, sc, ml] = await Promise.all([
           getCompanyProfile(id),
           getCompanyScore(id),
+          getCompanyMLScore(id).catch(() => null),
         ]);
         setProfile(prof);
         setScoreData(sc);
+        setMLScore(ml);
       } catch (err) {
         setError(`Impossible de charger la fiche entreprise pour l'identifiant ${id}`);
       } finally {
@@ -59,10 +66,18 @@ export default function CompanyProfile() {
           </p>
         </div>
         <div className="text-right">
-          <span className="text-xs uppercase tracking-wider text-gray-400 font-bold block">Score M&A</span>
+          <span className="text-xs uppercase tracking-wider text-gray-400 font-bold block">Score M&amp;A</span>
           <span className="text-3xl font-extrabold text-blue-600">
             {scoreData?.m_and_a_score ? scoreData.m_and_a_score.toFixed(1) : "N/A"}/100
           </span>
+          {mlScore && (
+            <div className="mt-2">
+              <span className="text-xs uppercase tracking-wider text-gray-400 font-bold block">Probabilité Acquisition (ML)</span>
+              <span className="text-2xl font-bold text-purple-600">
+                {mlScore.acquisition_probability.toFixed(1)}%
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -135,6 +150,45 @@ export default function CompanyProfile() {
             </p>
           </div>
         </div>
+
+        {mlScore && mlScore.shap_explanation && (
+          <div className="bg-white p-6 rounded-xl border border-gray-200 space-y-4">
+            <h3 className="text-base font-semibold text-gray-900">Explication ML (SHAP)</h3>
+            <p className="text-xs text-gray-500">
+              Facteurs qui font varier la probabilité d'acquisition pour cette entreprise.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase text-emerald-700 mb-2">Facteurs Positifs</p>
+                <ul className="space-y-1">
+                  {mlScore.shap_explanation.positive_drivers?.map((d, idx) => (
+                    <li key={idx} className="text-sm text-gray-700 flex items-center justify-between">
+                      <span>{d.feature} ({d.value})</span>
+                      <span className="text-emerald-600 font-medium">+{d.impact}</span>
+                    </li>
+                  ))}
+                  {(mlScore.shap_explanation.positive_drivers?.length || 0) === 0 && (
+                    <li className="text-xs text-gray-400">Aucun facteur positif détecté.</li>
+                  )}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase text-rose-700 mb-2">Facteurs Négatifs</p>
+                <ul className="space-y-1">
+                  {mlScore.shap_explanation.negative_drivers?.map((d, idx) => (
+                    <li key={idx} className="text-sm text-gray-700 flex items-center justify-between">
+                      <span>{d.feature} ({d.value})</span>
+                      <span className="text-rose-600 font-medium">{d.impact}</span>
+                    </li>
+                  ))}
+                  {(mlScore.shap_explanation.negative_drivers?.length || 0) === 0 && (
+                    <li className="text-xs text-gray-400">Aucun facteur négatif détecté.</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
