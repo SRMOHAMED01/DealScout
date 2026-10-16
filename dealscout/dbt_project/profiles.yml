@@ -1,0 +1,27 @@
+# profiles.yml — Profils dbt DealScout (Palier C.1)
+# Copier ce fichier à la racine du projet dbt (~) ou définir DBT_PROFILES_DIR.
+
+dealscout:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5432
+      user: dealscout
+      password: changeme
+      dbname: dealscout_db
+      schema: public
+      threads: 4
+      keepalives_idle: 0
+
+    prod:
+      type: postgres
+      host: ${DBT_PROD_HOST:-postgres}
+      port: ${DBT_PROD_PORT:-5432}
+      user: ${DBT_PROD_USER:-dealscout}
+      password: ${DBT_PROD_PASSWORD:-changeme}
+      dbname: ${DBT_PROD_DBNAME:-dealscout_db}
+      schema: public
+      threads: 4
+      keepalives_idle: 0

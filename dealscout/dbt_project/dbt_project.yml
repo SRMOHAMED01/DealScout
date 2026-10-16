@@ -2,4 +2,18 @@
 name: 'dealscout'
 version: '1.0.0'
 profile: 'dealscout'
+
 model-paths: ["models"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages", "logs"]
+
+vars:
+  dealscout:
+    warehouse_type: postgresql
+
+require-dbt-version: [">=1.0.0"]

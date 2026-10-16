@@ -1,107 +1,89 @@
 {
-  "annotations": { "list": [] },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
   "id": null,
-  "links": [],
-  "liveNow": false,
+  "uid": "dealscout-business",
+  "title": "DealScout — Business Dashboard",
+  "timezone": "Europe/Paris",
   "panels": [
     {
-      "id": 1,
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "type": "stat",
-      "title": "Total Entreprises Analysées",
+      "title": "Entreprises Analysées",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "count(dealscout_company_score)",
-          "refId": "A"
+          "expr": "count(dealscout_companies_total)",
+          "legendFormat": "entreprises"
         }
       ],
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 2,
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "type": "stat",
-      "title": "Cibles Prioritaires Détectées",
+      "title": "Cibles Prioritaires",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "count(dealscout_company_score >= 85)",
-          "refId": "A"
+          "expr": "count(dealscout_priority_targets_total)",
+          "legendFormat": "cibles prioritaires"
         }
       ],
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none"
-      }
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 3,
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
       "type": "stat",
-      "title": "Score M&A Moyen du Portefeuille",
+      "title": "Score M&A Moyen",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "avg(dealscout_company_score)",
-          "refId": "A"
+          "expr": "avg(dealscout_ma_score_avg)",
+          "legendFormat": "score moyen"
         }
       ],
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none"
-      }
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 1 }
+      },
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 4,
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
-      "type": "stat",
-      "title": "Croissance Moyenne Annuelle",
+      "type": "timeseries",
+      "title": "Score M&A par Secteur",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "avg(dealscout_company_growth)",
-          "refId": "A"
+          "expr": "avg by (sector) (dealscout_ma_score_avg)",
+          "legendFormat": "{{sector}}"
         }
       ],
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none"
-      }
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 }
     },
     {
-      "id": 5,
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
       "type": "barchart",
-      "title": "Score M&A Moyen par Secteur",
+      "title": "Top Opportunités",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "avg by (sector) (dealscout_company_score)",
-          "legendFormat": "{{sector}}",
-          "refId": "A"
+          "expr": "topk(10, dealscout_ma_score)",
+          "legendFormat": "{{company}}"
         }
-      ]
-    },
-    {
-      "id": 6,
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
-      "type": "table",
-      "title": "Top Opportunités d'Acquisition (Classement M&A)",
-      "targets": [
-        {
-          "expr": "topk(10, dealscout_company_score)",
-          "refId": "A"
-        }
-      ]
+      ],
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 }
     }
   ],
-  "schemaVersion": 38,
-  "style": "dark",
-  "tags": ["dealscout", "business", "m&a"],
   "time": { "from": "now-6h", "to": "now" },
-  "title": "DealScout — M&A Business Intelligence",
-  "uid": "dealscout-business"
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "version": 1
 }

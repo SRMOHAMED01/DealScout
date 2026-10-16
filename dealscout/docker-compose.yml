@@ -31,6 +31,16 @@ services:
     networks:
       - dealscout-net
 
+  kafka-exporter:
+    image: bitnami/kafka-exporter:latest
+    container_name: dealscout-kafka-exporter
+    ports:
+      - "9308:9308"
+    command:
+      - --kafka.server=kafka:9092
+    networks:
+      - dealscout-net
+
   minio:
     image: quay.io/minio/minio:RELEASE.2024-01-18T22-51-28Z
     container_name: dealscout-minio
@@ -102,6 +112,20 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
+    networks:
+      - dealscout-net
+
+  dbt:
+    image: dbt-labs/dbt-postgres:1.8-latest
+    container_name: dealscout-dbt
+    working_dir: /opt/dbt
+    volumes:
+      - ./dbt_project:/opt/dbt
+      - ~/.dbt:/root/.dbt
+      - ./dbt_project/profiles.yml:/root/.dbt/profiles.yml
+    command: ["sh", "-c", "dbt deps && dbt build --vars 'warehouse_type: postgresql'"]
+    depends_on:
+      - postgres
     networks:
       - dealscout-net
 

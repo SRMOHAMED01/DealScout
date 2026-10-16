@@ -104,6 +104,11 @@ def run_scoring_gold():
         merged = c.merge(f, on="company_id", how="left").merge(n, on="company_id", how="left")
         merged["growth"] = merged["revenue_growth"]
         merged["funding"] = merged["funding_total"]
+        # Align column names with scoring_engine / dbt Gold contracts
+        if "financial_health_score" in merged.columns:
+            merged["financial_health"] = merged["financial_health_score"]
+        if "news_sentiment_score" in merged.columns:
+            merged["news_sentiment"] = merged["news_sentiment_score"]
 
         scored_targets = compute_scores(merged)
         write_to_gold(scored_targets)

@@ -8,12 +8,12 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import companies, search
+from app.routers import auth, companies, search
 
 logger = logging.getLogger("dealscout.backend")
 
 app = FastAPI(
-    title="DealScout API â€” M&A Intelligence Platform",
+    title="DealScout API — M&A Intelligence Platform",
     description="API for enterprise detection, financial analysis, multi-criteria screening, and M&A opportunity scoring.",
     version="1.0.0",
 )
@@ -28,6 +28,7 @@ app.add_middleware(
 )
 
 # Include API routers
+app.include_router(auth.router)
 app.include_router(companies.router)
 app.include_router(search.router)
 

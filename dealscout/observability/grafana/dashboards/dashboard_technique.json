@@ -1,91 +1,88 @@
 {
-  "annotations": { "list": [] },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
   "id": null,
-  "links": [],
-  "liveNow": false,
+  "uid": "dealscout-technique",
+  "title": "DealScout — Technical Dashboard",
+  "timezone": "Europe/Paris",
   "panels": [
     {
-      "id": 1,
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
-      "type": "timeseries",
-      "title": "Latence API FastAPI (p50, p95, p99)",
+      "type": "stat",
+      "title": "API Latence (p95)",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p50",
-          "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p99",
-          "refId": "C"
+          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m]))",
+          "legendFormat": "p95 latency"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3 }
+      },
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 2,
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
-      "type": "timeseries",
-      "title": "Débit d'ingestion Kafka (msg/sec)",
+      "type": "stat",
+      "title": "Taux d'erreur API",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(rate(kafka_topic_partition_current_offset[1m])) by (topic)",
-          "legendFormat": "{{topic}}",
-          "refId": "A"
+          "expr": "sum(rate(http_server_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_server_requests_total[5m])) * 100",
+          "legendFormat": "error rate %"
         }
-      ]
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2 } },
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 3,
-      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
-      "type": "timeseries",
-      "title": "Taux d'erreurs HTTP 5xx (%)",
+      "type": "stat",
+      "title": "Kafka Lag",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
-          "legendFormat": "5xx error rate",
-          "refId": "A"
+          "expr": "kafka_consumergroup_lag",
+          "legendFormat": "{{topic}} {{consumergroup}}"
         }
-      ]
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 4,
-      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 6 },
-      "type": "timeseries",
-      "title": "Durée d'exécution du Pipeline Quotidien Airflow (secondes)",
+      "type": "stat",
+      "title": "DAG Airflow Dernière Exécution",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "airflow_dag_run_duration{dag_id=\"dealscout_daily_pipeline\"}",
-          "legendFormat": "Durée DAG",
-          "refId": "A"
+          "expr": "airflow_dag_last_success",
+          "legendFormat": "{{dag_id}}"
         }
-      ]
+      ],
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 }
     },
     {
-      "id": 5,
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 6 },
-      "type": "gauge",
-      "title": "Taux de Succès des Contrôles Data Quality (%)",
+      "type": "timeseries",
+      "title": "Durée des Jobs Spark",
+      "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "dealscout_data_quality_passed_checks / dealscout_data_quality_total_checks * 100",
-          "refId": "A"
+          "expr": "avg by (job) (spark_job_duration_seconds)",
+          "legendFormat": "{{job}}"
         }
-      ]
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requêtes API par Endpoint",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum by (handler) (rate(http_server_requests_total[5m]))",
+          "legendFormat": "{{handler}}"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 }
     }
   ],
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "15s",
   "schemaVersion": 38,
-  "style": "dark",
-  "tags": ["dealscout", "technical", "devops"],
-  "time": { "from": "now-6h", "to": "now" },
-  "title": "DealScout — Infrastructure & Pipeline Health",
-  "uid": "dealscout-technical"
+  "version": 1
 }
