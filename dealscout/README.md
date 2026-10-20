@@ -1,81 +1,79 @@
-# DealScout — M&A Intelligence Platform
+# DealScout - M&A Intelligence Platform
 
-Plateforme de détection et scoring automatique d'opportunités d'acquisition
-et d'investissement. Architecture Data Lakehouse (Bronze/Silver/Gold) +
-Scoring Engine (règles métier puis ML/SHAP) + Dashboard décisionnel React.
+DealScout is an end-to-end data platform that helps investment teams identify and prioritize potential M&A targets. It ingests company, financial, and news data, transforms it through a Bronze ? Silver ? Gold data lakehouse pipeline, scores companies with both deterministic rules and an explainable ML model, and exposes insights through a FastAPI backend and a React dashboard.
 
----
+## What it does
 
-## 📊 État d'avancement par Palier
+- **Ingests and standardizes data** � Pulls synthetic/structured company, financial, and news signals through Kafka, landing raw events in the Bronze layer for reproducible processing.
+- **Cleans and enriches at scale** � Spark jobs normalize entities, deduplicate records, compute key financial ratios and aggregate news sentiment to create clean Silver datasets.
+- **Builds an analytical layer** � dbt models shape curated Gold tables (company_360, investment_targets, market_analysis) that power analytics, scoring, and reporting.
+- **Scores acquisition potential** � A transparent, rule-based M&A scoring engine (0-100) ranks targets with clear rationale (strengths/risks). An XGBoost classifier predicts acquisition probability and uses SHAP to explain why each prediction was made.
+- **Exposes and visualizes insights** � FastAPI REST endpoints serve company data, scores, search, and market analysis. A React + Tailwind + Recharts dashboard lets users filter, rank, and drill into company 360� profiles with ML explainability visuals.
 
-| Palier | Composant | Description | Statut |
-|---|---|---|---|
-| **A** | **Ingestion & Bronze** | Générateur d'entreprises réalistes, connecteurs (DB, Financial, News), Kafka producers standardisés avec enveloppe, consumer Bronze partitionné MinIO/Local | **Implemented** ✅ (100%) |
-| **B** | **Silver (Spark / Parquet)** | Nettoyage, standardisation pays/secteurs, dédoublonnage, ratios financiers, sentiment agrégé, stockage Parquet PyArrow | **Implemented** ✅ (100%) |
-| **C** | **Gold (dbt)** | Modèles SQL analytiques (`company_360`, `investment_targets`, `market_analysis`) + tests unitaires + profiles | **Implemented** ✅ (100%) |
-| **D** | **Scoring Engine v1** | Formule de scoring M&A pondérée déterministe (0-100), ranking, recommandations et explications détaillées (forces / risques) | **Implemented** ✅ (100%) |
-| **E** | **Machine Learning** | Modèle prédictif `XGBClassifier`, entraînement, évaluation (ROC-AUC), sauvegarde de modèle et explicabilité locale SHAP (`TreeExplainer`) | **Implemented** ✅ (100%) |
-| **F** | **Backend FastAPI** | Endpoints REST (`/companies`, `/companies/{id}`, `/companies/{id}/score`, `/companies/{id}/ml-score`, `/search`, `/market-analysis`, `/health`, `/metrics`, `/auth/token`) + auth JWT + persistance Postgres | **Implemented** ✅ (100%) |
-| **G** | **Frontend React** | Dashboard KPIs, Top opportunités, Recherche multi-critères, Profil entreprise 360, graphique décomposition score + explicabilité ML (SHAP), page de connexion, persistance token | **Implemented** ✅ (100%) |
-| **H** | **Orchestration & DevOps** | DAG quotidien automatisé, validation Data Quality, `docker-compose.yml` multi-services (kafka-exporter, dbt), scraping Prometheus, dashboards Grafana provisionnés, recette OpenMetadata, CI/CD | **Implemented** ✅ (100%) |
+## Key Features
 
----
+- **Hybrid intelligence** � Deterministic business rules for explainability + ML with local SHAP explanations for trust and auditability.
+- **End-to-end pipeline** � From ingestion to scored outputs, the full flow is automated, testable, and orchestrated daily with Airflow-style scheduling.
+- **Data quality built-in** � Great Expectations-style validations guard data quality at key stages.
+- **Production-minded** � Includes Docker Compose setup, observability (Prometheus/Grafana), governance/lineage scaffolding (OpenMetadata), and CI workflow.
+- **Search and discovery** � Multi-criteria search to quickly surface high-potential targets by sector, geography, growth, and more.
 
-## 🏗️ Structure du projet
+## Tech Stack
 
-- `ingestion/`          → Connecteurs sources (API/News/Synthetic), client Kafka résilient & Bronze writer
-- `spark_jobs/`        → Jobs de nettoyage et transformation Bronze $\rightarrow$ Silver (Parquet)
-- `data_quality/`     → Suites de validation de la qualité des données (Great Expectations style)
-- `dbt_project/`       → Modèles dbt Silver $\rightarrow$ Gold (`company_360`, `investment_targets`, `market_analysis`)
-- `scoring_engine/`    → Moteur de scoring M&A par règles métier pondérées et explications
-- `ml/`                → Modèle prédictif XGBoost + explicabilité locale SHAP
-- `backend/`           → API FastAPI (`/companies`, `/score`, `/search`, `/market-analysis`)
-- `frontend/`          → Dashboard React Vite + Tailwind CSS + Recharts
-- `orchestration/`     → DAGs Airflow (`dealscout_daily_pipeline.py`)
-- `observability/`      → Configurations Prometheus & Dashboards Grafana
-- `tests/`             → Suite complète de tests unitaires et d'intégration pytest
+**Data and Pipelines:** Kafka, Apache Spark (PySpark), dbt, Parquet, MinIO/local storage  
+**ML and Scoring:** scikit-learn/xgboost, SHAP  
+**Backend:** FastAPI, SQLAlchemy, Pydantic, JWT auth, PostgreSQL  
+**Frontend:** React, Vite, TypeScript, Tailwind CSS, Recharts  
+**Infra/Platform:** Docker Compose, Airflow (DAGs), Prometheus, Grafana, Great Expectations, OpenMetadata  
+**Testing:** pytest (unit, integration, E2E)
 
----
+## Architecture (high level)
 
-## 🚀 Démarrage & Tests
+Sources (Companies/Financial/News) -> Kafka -> Bronze (raw) -> Spark (Silver, clean) -> dbt (Gold, curated) -> Scoring Engine (rules) + XGBoost + SHAP -> FastAPI -> React Dashboard
 
-### 1. Exécuter la suite de tests automatisés
+## Getting Started
 
-```bash
+### Prerequisites
+- Python 3.10+
+- Node.js 18+ (for frontend)
+- Docker and Docker Compose (optional for full platform)
+
+### Run Tests
+`ash
 cd dealscout
 python -m pytest -v
-```
+`
 
-### 2. Lancer l'API FastAPI
-
-```bash
+### Run API
+`ash
 cd dealscout
 python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-Documentation Swagger accessible sur : `http://localhost:8000/docs`
+`
+Swagger: http://localhost:8000/docs
 
-### 3. Lancer le Frontend React
-
-```bash
+### Run Frontend
+`ash
 cd dealscout/frontend
 npm install
 npm run dev
-```
+`
+App: http://localhost:5173
 
-### 4. Déploiement complet via Docker Compose
-
-```bash
+### Full Stack (Docker)
+`ash
 cd dealscout
 cp .env.example .env
 docker-compose up -d
-```
+`
 
----
+## What this demonstrates
 
-## 💼 Positionnement dans la suite portfolio Fintech
+This project showcases practical full-stack data engineering: building a production-style lakehouse, enforcing data quality, blending rule-based + explainable ML for decision support, exposing clean APIs, and delivering an actionable UI. It's designed to be portfolio-ready and clearly communicates business value to both technical and non-technical audiences.
 
-```
-LedgerLake   → Data Foundation (plateforme de données financières)
-CreditPulse  → Credit Risk Decision Engine (scoring crédit)
-DealScout    → Investment & M&A Intelligence Engine (scoring d'opportunités)
-```
+## Project Status
+
+All 8 development paliers (A-H) are implemented and validated with passing tests. Core functionality is complete and demo-ready.
+
+## Author
+
+[Serr�ar Mohamed](https://github.com/SRMOHAMED01)
