@@ -69,3 +69,18 @@ def test_market_analysis():
     assert len(data) > 0
     assert "sector" in data[0]
     assert "average_growth" in data[0]
+
+
+def test_auth_login_success():
+    response = client.post("/auth/token?username=dealscout&password=changeme")
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+
+def test_auth_login_failure():
+    response = client.post("/auth/token?username=wrong&password=wrong")
+    assert response.status_code == 400
+    assert "Identifiants incorrects" in response.json()["detail"]
+

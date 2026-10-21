@@ -1,1 +1,1 @@
-﻿
+"""Business logic and scoring services."""

@@ -1,4 +1,4 @@
-﻿"""
+"""
 main.py — Point d'entrée FastAPI pour DealScout (Palier F)
 
 L'ajout du répertoire backend/ au sys.path permet aux imports internes
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 _BACKEND_DIR = Path(__file__).resolve().parent.parent  # .../dealscout/backend
@@ -24,15 +25,38 @@ from app.core.database import SessionLocal, engine, Base
 from app.core.config import settings
 from app.models.company import Company
 from app.models.investment_target import InvestmentTarget
+from app.services.scoring_service import service
 
 from app.routers import auth, companies, search
 
 logger = logging.getLogger("dealscout.backend")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Initialisation au démarrage et nettoyage à l'arrêt (FastAPI Lifespan).
+    Crée les tables Postgres et synchronise les cibles scorées si Postgres est disponible.
+    En cas d'indisponibilité du SGBD, bascule automatiquement sur le stockage Parquet.
+    """
+    try:
+        Base.metadata.create_all(bind=engine)
+        service.refresh_data()
+        service.persist_to_postgres()
+        logger.info("Base de données initialisée et cibles persistées")
+    except Exception as exc:
+        logger.warning(
+            "Initialisation PostgreSQL reportée (mode fallback Parquet actif) : %s",
+            exc,
+        )
+    yield
+
+
 app = FastAPI(
     title="DealScout API — M&A Intelligence Platform",
     description="API for enterprise detection, financial analysis, multi-criteria screening, and M&A opportunity scoring.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS configuration for React frontend
@@ -48,15 +72,6 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(companies.router)
 app.include_router(search.router)
-
-
-@app.on_event("startup")
-def _init_db() -> None:
-    """Crée les tables Postgres et persiste les cibles scorées au démarrage."""
-    Base.metadata.create_all(bind=engine)
-    service.refresh_data()
-    service.persist_to_postgres()
-    logger.info("Base de données initialisée et cibles persistées")
 
 
 @app.get("/health", tags=["Health"])
