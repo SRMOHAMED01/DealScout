@@ -1,0 +1,3 @@
+# DealScout Data Samples
+# This directory stores local JSON sample exports (e.g. companies.json).
+# Run `python dealscout/ingestion/generators/company_generator.py` to generate sample data.
